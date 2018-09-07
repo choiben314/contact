@@ -1,0 +1,10 @@
+{
+    "name": "Contact",
+    "version": "0.0.1",
+    "description": "Web-based version of verbal Contact! game.",
+    "dependencies": {
+        "socket.io": "latest",
+        "express": "latest"
+    },
+    "author": "Ben Choi"
+}
