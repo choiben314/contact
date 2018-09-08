@@ -1,0 +1,5 @@
+- join game with player name and game id
+- server keeps track of player names in each game id
+- threshold reached -> start game
+- play game
+- quit game

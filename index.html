@@ -1,1 +1,55 @@
-<h1>Contact</h1>
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<title>Contact</title>
+</head>
+
+<body>
+
+<script src="/socket.io/socket.io.js"></script>
+
+    <div id="gameCanvas">
+    </div>
+
+<script id="intro-screen-template" type="text/template">
+	<div class = "intro_buttons">
+		<button id="btnNew" class="btn">New Game</button>
+		
+		<button id="btnJoin" class="btn">Join Game</button>
+	</div>
+</script>
+
+<script id="new-game-template" type="text/template">
+	<div class="info">
+        <label for="inputPlayerName">Your Name:</label>
+        <input id="inputPlayerName" type="text" />
+    </div>
+
+    <div class="create_buttons">
+        <button id="btnCreate" class="btn">Create</button>
+    </div>
+</script>
+
+<script id="join-game-template" type="text/template">
+	<div class="info">
+        <label for="inputPlayerName">Your Name:</label>
+        <input id="inputPlayerName" type="text" />
+    </div>
+
+    <div class="info">
+        <label for="inputGameID">Game ID:</label>
+        <input id="inputGameID" type="text"/>
+    </div>
+
+    <div class="join_buttons">
+        <button id="btnStart" class="btn">Start</button>
+    </div>
+</script>
+
+
+<script src="/public/js/app.js"></script>
+
+</body>
+
+</html>
