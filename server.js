@@ -20,6 +20,7 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on('createNewGame', createNewGame);
 	socket.on('playerJoinGame', playerJoinGame);
+	//socket.on('createWords', createWords);
 });
 
 
@@ -44,26 +45,19 @@ function createNewGame(name) {
 
 function playerJoinGame(data) {
 	var socket = this;
-	var room = rooms.find(r => r.gameID == data.gameID);
+	var room = getRoomByID(data.gameID);
 
 	if (room != null) {
 	socket.join(room.gameID);
 	room.players.push(data.playerName);
-
     console.log('Player ' + data.playerName + ' joining game: ' + room.gameID);
-    io.sockets.in(room.gameID).emit('player_joined_game', data.playerName);
+    io.sockets.in(room.gameID).emit('player_joined_game', room.players);
 	}
 	else {
 	console.log("Game does not exist.");
 	}
-}
+};
 
-function getRoom(game_id) {
-	for (var i in rooms) {
-		console.log(rooms[i].gameID);
-		if (rooms[i].gameID == game_id) {
-			return rooms[i];
-		}
-	}
-	console.log("Room not found");
-}
+function getRoomByID(gameID) {
+	return rooms.find(r => r.gameID == gameID);
+};

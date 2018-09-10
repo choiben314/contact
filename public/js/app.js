@@ -8,11 +8,10 @@ jQuery(function($) {
         bindEvents : function() {
             IO.socket.on('connected', IO.onConnected );
             IO.socket.on('new_game_created', IO.onNewGameCreated );
-            IO.socket.on('player_joined_room', IO.onPlayerJoinedRoom );
+            IO.socket.on('player_joined_game', IO.onPlayerJoinedRoom );
         },
 
         onConnected: function() {
-            // room = "12345"
         	console.log("Client connected.");
         	// IO.socket.emit('room', room);
         },
@@ -22,13 +21,18 @@ jQuery(function($) {
             IO.socket.emit('playerJoinGame', data);
         },
 
+        onPlayerJoinedRoom: function(allPlayerNames) {
+            // Update shown player list
+            var playerHTML = $.map(allPlayerNames, function(playerName) {
+                return('<span>' + playerName + '</span>');
+            });
+            Game.$templateWaitScreen.html(playerHTML.join(""));
+            Game.showWaitScreen();
+        }
+
 	};
 
 	var Game = {
-
-        // gameID: 0,
-        // myRole: '',
-        // mySocketID: '',
 
         // SETUP
 
@@ -42,9 +46,14 @@ jQuery(function($) {
             Game.$doc = $(document);
 
             Game.$gameCanvas = $('#gameCanvas');
+
+            // Static
             Game.$templateIntroScreen = $('#intro-screen-template').html();
             Game.$templateNewScreen = $('#new-game-template').html();
             Game.$templateJoinScreen = $('#join-game-template').html();
+
+            // Dynamic
+            Game.$templateWaitScreen = $('#wait-game-template');
         },
 
         showInitScreen: function() {
@@ -59,6 +68,10 @@ jQuery(function($) {
             Game.$gameCanvas.html(Game.$templateJoinScreen);
         },
 
+        showWaitScreen: function() {
+            Game.$gameCanvas.html(Game.$templateWaitScreen.html());
+        },
+
         bindEvents: function() {
             Game.$doc.on('click', '#btnNew', Game.showNewScreen);
             Game.$doc.on('click', '#btnJoin', Game.showJoinScreen);
@@ -66,24 +79,17 @@ jQuery(function($) {
             Game.$doc.on('click', '#btnStart', Game.Player.onStartClick);
         },
 
-
-        // gameInit: function (data) {
-        //     Game.gameID = data.gameID;
-        //     Game.mySocketID = data.mySocketID;
-        //     Game.myRole = 'Host';
-        // },
-
         // PLAYER
 
         Player : {
             myName: '',
 
             onCreateClick: function () {
-            playerName = $('#inputPlayerName').val() || 'anon'
-            Game.myRole = 'Player';
-            Game.Player.myName = playerName;
+                playerName = $('#inputPlayerName').val() || 'anon'
+                Game.Player.myName = playerName;
 
-            IO.socket.emit('createNewGame', Game.Player.myName);
+                IO.socket.emit('createNewGame', Game.Player.myName);
+                Game.showWaitScreen();
         },
             onStartClick: function() {
                 var data = {
@@ -91,8 +97,8 @@ jQuery(function($) {
                     playerName : $('#inputPlayerName').val() || 'anon'
                 };
                 IO.socket.emit('playerJoinGame', data);
-                Game.myRole = 'Player';
                 Game.Player.myName = data.playerName;
+                Game.showWaitScreen();
             }
         },
 	};
