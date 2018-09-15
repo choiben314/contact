@@ -8,7 +8,9 @@ jQuery(function($) {
         bindEvents : function() {
             IO.socket.on('connected', IO.onConnected );
             IO.socket.on('new_game_created', IO.onNewGameCreated );
-            IO.socket.on('player_joined_game', IO.onPlayerJoinedRoom );
+            IO.socket.on('player_joined_game', IO.onPlayerJoinedGame );
+            IO.socket.on('game_started', IO.onGameStarted );
+            IO.socket.on('master_chosen', IO.onMasterChosen);
         },
 
         onConnected: function() {
@@ -19,20 +21,37 @@ jQuery(function($) {
         onNewGameCreated: function(data) {
             // Create initial player
             IO.socket.emit('playerJoinGame', data);
+            $('.header_game_id').html('<h1>' + data.gameID + '</h1>'); 
         },
 
-        onPlayerJoinedRoom: function(allPlayerNames) {
+        onPlayerJoinedGame: function(room) {
             // Update shown player list
-            var playerHTML = $.map(allPlayerNames, function(playerName) {
-                return('<span>' + playerName + '</span>');
+            var playerHTML = $.map(room.players, function(player) {
+                return('<button class="player-link" id='+ player.myName + '>' + player.myName + '</button><br>');
             });
-            Game.$templateWaitScreen.html(playerHTML.join(""));
-            Game.showWaitScreen();
-        }
+            $('#playerList').html(playerHTML.join(""));
+
+            IO.onMasterChosen(room.master);
+        },
+        onGameStarted: function(master) {
+            Game.showPlayScreen();
+            $('.header_game_id').html('<h1>' + Game.myGameID + '</h1>');
+            $('.masterChosen').html('<h2>Wordmaster: ' + master.myName + '</h2>');
+        },
+        onMasterChosen: function(master) {
+            if (master != null) {
+                $('.masterChosen').html('<h2>Wordmaster: ' + master.myName + '</h2>');
+            }
+            else {
+                $('.masterChosen').html('<h2>Wordmaster: Random</h2>');
+            }
+        },
 
 	};
 
 	var Game = {
+
+        myGameID: '',
 
         // SETUP
 
@@ -51,9 +70,8 @@ jQuery(function($) {
             Game.$templateIntroScreen = $('#intro-screen-template').html();
             Game.$templateNewScreen = $('#new-game-template').html();
             Game.$templateJoinScreen = $('#join-game-template').html();
-
-            // Dynamic
-            Game.$templateWaitScreen = $('#wait-game-template');
+            Game.$templateWaitScreen = $('#wait-game-template').html();
+            Game.$templatePlayScreen = $('#play-game-template').html();
         },
 
         showInitScreen: function() {
@@ -69,7 +87,11 @@ jQuery(function($) {
         },
 
         showWaitScreen: function() {
-            Game.$gameCanvas.html(Game.$templateWaitScreen.html());
+            Game.$gameCanvas.html(Game.$templateWaitScreen);
+        },
+
+        showPlayScreen: function() {
+            Game.$gameCanvas.html(Game.$templatePlayScreen);
         },
 
         bindEvents: function() {
@@ -77,31 +99,62 @@ jQuery(function($) {
             Game.$doc.on('click', '#btnJoin', Game.showJoinScreen);
             Game.$doc.on('click', '#btnCreate', Game.Player.onCreateClick);
             Game.$doc.on('click', '#btnStart', Game.Player.onStartClick);
+            Game.$doc.on('click', '#btnGo', Game.Player.onGoClick);
+
+            Game.$doc.on('click', '.player-link', $(this), Game.Player.onPlayerClick);
+            Game.$doc.on('click', '#btnRandom', Game.Player.onRandomClick);
+
         },
 
         // PLAYER
 
         Player : {
             myName: '',
+            // myRole: '',
 
             onCreateClick: function () {
-                playerName = $('#inputPlayerName').val() || 'anon'
-                Game.Player.myName = playerName;
 
-                IO.socket.emit('createNewGame', Game.Player.myName);
+                var data = {
+                    gameID : (Math.random() * 100000) | 0,
+                    playerName: $('#inputPlayerName').val() || 'anon',
+                    // role: 'master',
+                };
+                
+                Game.Player.myName = data.playerName;
+                // Game.Player.myRole = data.role;
+                Game.myGameID = data.gameID;
+                
+                IO.socket.emit('createNewGame', data);
+                
                 Game.showWaitScreen();
-        },
+            },
             onStartClick: function() {
                 var data = {
                     gameID : +($('#inputGameID').val()),
-                    playerName : $('#inputPlayerName').val() || 'anon'
+                    playerName : $('#inputPlayerName').val() || 'anon',
+                    // role : 'regular',
                 };
-                IO.socket.emit('playerJoinGame', data);
+
                 Game.Player.myName = data.playerName;
+                // Game.Player.myRole = data.role;
+                Game.myGameID = data.gameID;
+
+                IO.socket.emit('playerJoinGame', data);
+                
                 Game.showWaitScreen();
+            },
+            onGoClick: function() {
+                IO.socket.emit('startGame', Game.myGameID);
+            },
+            onPlayerClick: function(event) {
+                IO.socket.emit('masterChosen', {gameID: Game.myGameID, playerName: event.currentTarget.id});
+            },
+
+            onRandomClick: function() {
+                IO.socket.emit('masterChosen', {gameID: Game.myGameID});
             }
         },
-	};
+    };
 
 	IO.init();
 	Game.init();

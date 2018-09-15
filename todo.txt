@@ -3,3 +3,8 @@
 - threshold reached -> start game
 - play game
 - quit game
+
+
+wm v. regular
+wm clue(null)/word, regular clue/word(s)
+wm guess

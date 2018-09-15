@@ -20,7 +20,8 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on('createNewGame', createNewGame);
 	socket.on('playerJoinGame', playerJoinGame);
-	//socket.on('createWords', createWords);
+	socket.on('startGame', startGame);
+	socket.on('masterChosen', chooseMaster);
 });
 
 
@@ -28,36 +29,70 @@ io.sockets.on('connection', function (socket) {
 
 var rooms = [];
 
-function createNewGame(name) {
-	var game_id = (Math.random() * 100000) | 0;
+function createNewGame(data) {
 
 	var room = {
 		players: [],
-		words: [],
-		master: '',
-		gameID: game_id,
+		master: null,
+		gameID: data.gameID,
 	};
 
 	rooms.push(room);
 
-	this.emit('new_game_created', {playerName: name, gameID: room.gameID});
+	this.emit('new_game_created', data);
 };
 
 function playerJoinGame(data) {
 	var socket = this;
 	var room = getRoomByID(data.gameID);
 
+	var player = {
+		myName: data.playerName,
+		// myRole: data.role,
+		pairs: [],
+	}
+
 	if (room != null) {
 	socket.join(room.gameID);
-	room.players.push(data.playerName);
-    console.log('Player ' + data.playerName + ' joining game: ' + room.gameID);
-    io.sockets.in(room.gameID).emit('player_joined_game', room.players);
+	room.players.push(player);
+    console.log('Player ' + player.myName + ' joining game: ' + room.gameID);
+    io.sockets.in(room.gameID).emit('player_joined_game', room);
 	}
 	else {
 	console.log("Game does not exist.");
 	}
+
+	// if (room.players.length >= 3) {
+	// 	io.sockets.in(room.gameID).emit('game_started');
+	// }
 };
+
+function startGame(gameID) {
+	var room = getRoomByID(gameID);
+	if (room.master == null) {
+		room.master = room.players[Math.floor(Math.random() * room.players.length)];
+	}
+	io.sockets.in(gameID).emit('game_started', room.master);
+}
+
+function chooseMaster(data) {
+	var room = getRoomByID(data.gameID);
+
+	if (data.playerName != null) {
+		room.master = getPlayerByName({room: room, playerName: data.playerName});
+	} 
+	else {
+		room.master = null;
+	}
+
+	io.sockets.in(data.gameID).emit('master_chosen', room.master);
+}
 
 function getRoomByID(gameID) {
 	return rooms.find(r => r.gameID == gameID);
 };
+
+function getPlayerByName(data) {
+	var room = data.room;
+	return room.players.find(p => p.myName == data.playerName);
+}

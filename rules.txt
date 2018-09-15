@@ -1,0 +1,15 @@
+# Players may either create a room or join an existing room.
+# A game is started after at least three players have joined a room.
+# The wordmaster may either be randomly chosen, or someone may elect to fill this position.
+# The wordmaster then must choose and submit a word.
+# The first letter of this word is revealed to all players. 
+# Players may now suggest a clue for a word that begins with the letter that has been revealed. 
+# Up to one clue may be suggested at a time, along with the word that is being clued (hidden from everyone except themselves). 
+# Players may also choose to retract their suggestion and suggest a different clue/word.
+# If another player feels that they know what word is being clued, they may indicate CONTACT with the suggested clue and submit their guessed word.
+# All other suggestions are now suspended, and the wordmaster must submit a word before the timer runs out (default: 10 seconds).
+# While the timer is running out, other players may also indicate CONTACT and submit their guesses.
+# Once the wordmaster submits a guess, or the timer runs out, all CONTACT submissions are revealed.
+# If the wordmaster's guess matches any of the submissions, then no additional letters of the wordmaster's word are revealed.
+# If the wordmaster's guess does not match any submissions, and any two of CONTACT submissions match, then the next letter of the wordmaster's word is revealed.
+# This is repeated until someone suggests a clue for a word that is in fact the wordmaster's word.

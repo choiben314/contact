@@ -2,6 +2,7 @@
 <html lang = "en">
 <head>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/public/css/style.css">
 	<title>Contact</title>
 </head>
 
@@ -48,8 +49,36 @@
 </script>
 
 <script id="wait-game-template" type="text/template">
-    <div id="playerList">
+    <div class="header_game_id">
+
+    </div>
+    <h4 id="master_instruct">Click a player to choose the wordmaster.</h4>
+    <div class="masterChosen">
         
+    </div>
+    <div id="playerList">
+    </div>
+    <div id="random_buttons">
+        <button id="btnRandom" class="btn">Random Wordmaster</button>  
+    </div>
+    <div id="go_buttons">
+        <button id="btnGo" class="btn">Let's go!</button>  
+    </div>
+</script>
+
+<script id="play-game-template" type="text/template">
+    <div class="header_game_id">
+        
+    </div>
+    <div class="masterChosen">
+    
+    </div>
+    <div id="words">
+        <p>Game</p>
+    </div>
+    <div id = "Input">
+        <input id="inputClue" type="text"/>
+        <input id="inputWord" type="text"/>
     </div>
 </script>
 
